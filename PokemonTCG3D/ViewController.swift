@@ -22,19 +22,23 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        sceneView.autoenablesDefaultLighting = false
         
-        // Set the scene to the view
-        sceneView.scene = scene
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         // Create a session configuration
-        let configuration = ARWorldTrackingConfiguration()
-
+        let configuration = ARImageTrackingConfiguration()
+        
+        if let imageToTrack = ARReferenceImage.referenceImages(inGroupNamed: "Pokemons", bundle: Bundle.main) {
+             
+            configuration.trackingImages = imageToTrack
+            
+            configuration.maximumNumberOfTrackedImages = 3
+            print("Imagem reconhecida com sucesso")
+        }
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -45,30 +49,50 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Pause the view's session
         sceneView.session.pause()
     }
-
-    // MARK: - ARSCNViewDelegate
     
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
+        
         let node = SCNNode()
-     
+        
+        if let imageAnchor = anchor as? ARImageAnchor {
+            
+            let plane = SCNPlane(width: imageAnchor.referenceImage.physicalSize.width, height: imageAnchor.referenceImage.physicalSize.height)
+            plane.firstMaterial?.diffuse.contents = UIColor(white: 1.0, alpha: 0.5)
+            
+            let planeNode = SCNNode(geometry: plane)
+            planeNode.eulerAngles.x = -.pi / 2
+            
+            node.addChildNode(planeNode)
+            
+            if imageAnchor.referenceImage.name == "eevee" {
+                if let pokemonScene = SCNScene(named: "art.scnassets/eevee.scn") {
+                    if let pokeNode = pokemonScene.rootNode.childNodes.first {
+                        pokeNode.eulerAngles.x = .pi / 2
+                        
+                        planeNode.addChildNode(pokeNode)
+                    }
+                }
+            }
+            if imageAnchor.referenceImage.name == "oddish" {
+                if let pokemonScene = SCNScene(named: "art.scnassets/oddish.scn") {
+                    if let pokeNode = pokemonScene.rootNode.childNodes.first {
+                        pokeNode.eulerAngles.x = .pi / 2
+                        
+                        planeNode.addChildNode(pokeNode)
+                    }
+                }
+            }
+            if imageAnchor.referenceImage.name == "pikachu" {
+                if let pokemonScene = SCNScene(named: "art.scnassets/Pikachu.scn") {
+                    if let pokeNode = pokemonScene.rootNode.childNodes.first {
+                        pokeNode.eulerAngles.x = .pi / 2
+                        
+                        planeNode.addChildNode(pokeNode)
+                    }
+                }
+            }
+        }
+        
         return node
-    }
-*/
-    
-    func session(_ session: ARSession, didFailWithError error: Error) {
-        // Present an error message to the user
-        
-    }
-    
-    func sessionWasInterrupted(_ session: ARSession) {
-        // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
-    }
-    
-    func sessionInterruptionEnded(_ session: ARSession) {
-        // Reset tracking and/or remove existing anchors if consistent tracking is required
-        
     }
 }
